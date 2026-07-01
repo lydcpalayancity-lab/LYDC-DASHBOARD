@@ -11,6 +11,20 @@ import AnalyticsTab from './components/AnalyticsTab';
 import { BARANGAYS, LYDC_CENTERS } from './api/_utils/constants';
 
 export default function Page() {
+  // Safe date formatter to prevent client-side crashes
+  const formatSafeDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'N/A';
+    return d.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   // Session & Authentication
   const [user, setUser] = useState(null);
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -831,10 +845,7 @@ export default function Page() {
                           </td>
                           <td className="py-4 px-6 text-white/60 font-mono text-xs">{doc.uploadedBy}</td>
                           <td className="py-4 px-6 text-white/60">
-                            {new Date(doc.date).toLocaleDateString('en-US', {
-                              month: 'short', day: 'numeric', year: 'numeric',
-                              hour: '2-digit', minute: '2-digit'
-                            })}
+                            {formatSafeDate(doc.date || doc.createdAt)}
                           </td>
                           <td className="py-4 px-6 text-right flex justify-end gap-2.5">
                             <a
@@ -949,16 +960,14 @@ export default function Page() {
                     </div>
                   ) : (
                     deadlines.map(dl => {
-                      const isExpired = new Date(dl.date) < new Date();
+                      const dVal = dl.date ? new Date(dl.date) : null;
+                      const isExpired = dVal && !isNaN(dVal.getTime()) ? dVal < new Date() : false;
                       return (
                         <div key={dl.id} className={`glass-card border rounded-xl p-4 flex items-center justify-between gap-4 ${isExpired ? 'border-red-500/20 bg-red-500/5' : 'border-white/10'}`}>
                           <div>
                             <h4 className="font-bold text-white leading-snug">{dl.title}</h4>
                             <p className="text-xs text-white/50 mt-1">
-                              Due: {new Date(dl.date).toLocaleString('en-US', {
-                                month: 'short', day: 'numeric', year: 'numeric',
-                                hour: '2-digit', minute: '2-digit'
-                              })}
+                              Due: {formatSafeDate(dl.date)}
                             </p>
                             {isExpired ? (
                               <span className="inline-block mt-2 px-2 py-0.5 rounded bg-red-500/10 text-[9px] font-bold uppercase text-red-400 border border-red-500/20">
@@ -1041,7 +1050,7 @@ export default function Page() {
                     ) : (
                       concernsList.map((c) => (
                         <tr key={c.id} className="hover:bg-white/5 transition-all">
-                          <td className="py-4 px-6 text-white/60 whitespace-nowrap">{new Date(c.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                          <td className="py-4 px-6 text-white/60 whitespace-nowrap">{formatSafeDate(c.timestamp)}</td>
                           <td className="py-4 px-6 font-semibold text-white">{c.username}</td>
                           <td className="py-4 px-6 uppercase text-xs text-gold font-bold">{c.role}</td>
                           <td className="py-4 px-6 text-white/60">{c.barangay || 'N/A'}</td>
@@ -1249,7 +1258,7 @@ export default function Page() {
                   <tbody className="divide-y divide-white/5 text-xs text-white/70 font-mono">
                     {auditLogs.map((log) => (
                       <tr key={log.id} className="hover:bg-white/5 transition-all">
-                        <td className="py-3 px-6 whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</td>
+                        <td className="py-3 px-6 whitespace-nowrap">{formatSafeDate(log.timestamp)}</td>
                         <td className="py-3 px-6 font-semibold text-white">{log.actor}</td>
                         <td className="py-3 px-6"><span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] font-bold text-white/80">{log.action}</span></td>
                         <td className="py-3 px-6 text-white/60 truncate max-w-md" title={log.details}>{log.details}</td>
