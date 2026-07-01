@@ -2,6 +2,23 @@ import { Pool } from 'pg';
 
 let pool = null;
 
+function parseConnectionString(url) {
+  try {
+    const cleanUrl = url.split('?')[0];
+    const matches = cleanUrl.match(/postgres(?:ql)?:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/);
+    if (!matches) return null;
+    return {
+      user: decodeURIComponent(matches[1]),
+      password: decodeURIComponent(matches[2]),
+      host: matches[3],
+      port: parseInt(matches[4], 10),
+      database: matches[5]
+    };
+  } catch (err) {
+    return null;
+  }
+}
+
 function getPool() {
   if (!pool) {
     const url = process.env.DATABASE_URL || '';
@@ -10,13 +27,23 @@ function getPool() {
     }
 
     if (!global._postgresPool) {
-      const cleanUrl = url.split('?')[0];
-      global._postgresPool = new Pool({
-        connectionString: cleanUrl,
-        ssl: {
-          rejectUnauthorized: false
-        }
-      });
+      const parsedConfig = parseConnectionString(url);
+      if (parsedConfig) {
+        global._postgresPool = new Pool({
+          ...parsedConfig,
+          ssl: {
+            rejectUnauthorized: false
+          }
+        });
+      } else {
+        const cleanUrl = url.split('?')[0];
+        global._postgresPool = new Pool({
+          connectionString: cleanUrl,
+          ssl: {
+            rejectUnauthorized: false
+          }
+        });
+      }
     }
     pool = global._postgresPool;
   }
