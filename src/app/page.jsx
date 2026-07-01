@@ -1108,3 +1108,5 @@ export default function Page() {
     </div>
   );
 }
+
+// Trigger Vercel rebuild to refresh env variables
