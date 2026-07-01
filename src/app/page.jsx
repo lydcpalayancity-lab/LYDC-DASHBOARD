@@ -34,6 +34,7 @@ export default function Page() {
   const [deadlines, setDeadlines] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [concernsList, setConcernsList] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
 
   // Uploader Form States
@@ -121,6 +122,7 @@ export default function Page() {
       } else if (activeTab === 'accounts' && user.role === 'admin') {
         fetchUsers();
         fetchAuditLogs();
+        fetchConcerns();
       }
     } else {
       if (activeTab === 'deadlines') {
@@ -194,6 +196,32 @@ export default function Page() {
       if (res.ok) setAuditLogs(data);
     } catch (err) {
       console.error('Audit logs load error:', err);
+    }
+  };
+
+  const fetchConcerns = async () => {
+    try {
+      const res = await fetch('/api/admin/getConcerns');
+      const data = await res.json();
+      if (res.ok) setConcernsList(data);
+    } catch (err) {
+      console.error('Failed to load concerns:', err);
+    }
+  };
+
+  const handleUpdateConcernStatus = async (id, status) => {
+    try {
+      const res = await fetch('/api/admin/updateConcernStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
+      if (res.ok) {
+        fetchConcerns();
+        fetchAuditLogs();
+      }
+    } catch (err) {
+      console.error('Failed to update concern status:', err);
     }
   };
 
@@ -1100,6 +1128,76 @@ export default function Page() {
                     </table>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Reported Concerns Block */}
+            <div className="glass-panel rounded-xl p-6 border border-gold/15 flex flex-col gap-4">
+              <div>
+                <h3 className="text-md font-bold text-gold-gradient">Reported Student & Officer Concerns</h3>
+                <p className="text-xs text-white/50">Manage concern tickets logged by users directly in Supabase</p>
+              </div>
+
+              <div className="overflow-x-auto w-full border border-white/5 rounded-lg max-h-[300px] overflow-y-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-white/5 border-b border-white/10 text-gold/80 text-[10px] font-semibold uppercase tracking-wider">
+                      <th className="py-3 px-6">Date</th>
+                      <th className="py-3 px-6">Reporter</th>
+                      <th className="py-3 px-6">Role</th>
+                      <th className="py-3 px-6">Barangay</th>
+                      <th className="py-3 px-6">Category</th>
+                      <th className="py-3 px-6">Description</th>
+                      <th className="py-3 px-6">Status</th>
+                      <th className="py-3 px-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-xs text-white/70 font-medium">
+                    {concernsList.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="py-8 text-center text-white/40">No concern tickets found.</td>
+                      </tr>
+                    ) : (
+                      concernsList.map((c) => (
+                        <tr key={c.id} className="hover:bg-white/5 transition-all">
+                          <td className="py-3 px-6 whitespace-nowrap">{new Date(c.timestamp).toLocaleDateString()}</td>
+                          <td className="py-3 px-6 font-semibold text-white">{c.username}</td>
+                          <td className="py-3 px-6 uppercase text-[10px] text-gold">{c.role}</td>
+                          <td className="py-3 px-6">{c.barangay}</td>
+                          <td className="py-3 px-6 font-semibold">{c.category}</td>
+                          <td className="py-3 px-6 text-white/60 truncate max-w-xs" title={c.description}>{c.description}</td>
+                          <td className="py-3 px-6">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              c.status === 'Open' ? 'bg-red-500/15 border border-red-500/30 text-red-400' :
+                              c.status === 'In Progress' ? 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-400' :
+                              'bg-green-500/15 border border-green-500/30 text-green-400'
+                            }`}>
+                              {c.status}
+                            </span>
+                          </td>
+                          <td className="py-3 px-6 text-right flex justify-end gap-1.5">
+                            {c.status !== 'Resolved' && (
+                              <button
+                                onClick={() => handleUpdateConcernStatus(c.id, 'Resolved')}
+                                className="px-2 py-1 bg-green-600 hover:bg-green-500 text-white rounded text-[10px] font-bold transition-all cursor-pointer"
+                              >
+                                Resolve
+                              </button>
+                            )}
+                            {c.status === 'Open' && (
+                              <button
+                                onClick={() => handleUpdateConcernStatus(c.id, 'In Progress')}
+                                className="px-2 py-1 bg-yellow-600 hover:bg-yellow-500 text-white rounded text-[10px] font-bold transition-all cursor-pointer"
+                              >
+                                Progress
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
 

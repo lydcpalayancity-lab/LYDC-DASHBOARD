@@ -41,6 +41,33 @@ export async function POST(req) {
       }
     }
 
+    // Ensure concerns table exists in Supabase
+    await query(`
+      CREATE TABLE IF NOT EXISTS concerns (
+        id SERIAL PRIMARY KEY,
+        timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        username VARCHAR(50) NOT NULL,
+        role VARCHAR(20) NOT NULL,
+        barangay VARCHAR(100),
+        category VARCHAR(100) NOT NULL,
+        description TEXT NOT NULL,
+        status VARCHAR(20) DEFAULT 'Open'
+      )
+    `);
+
+    // Insert directly to Supabase concerns table
+    await query(`
+      INSERT INTO concerns (username, role, barangay, category, description, status)
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `, [
+      session.username,
+      session.role,
+      session.barangay || 'N/A',
+      category || 'General Concern',
+      description,
+      'Open'
+    ]);
+
     // Also write to DB audit logs
     await query(
       `INSERT INTO audit_logs (actor, action, details) VALUES ($1, $2, $3)`,
