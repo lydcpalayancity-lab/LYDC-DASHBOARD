@@ -69,6 +69,13 @@ export default function Page() {
   const [concernCategory, setConcernCategory] = useState('General Concern');
   const [concernDescription, setConcernDescription] = useState('');
   const [concernLoading, setConcernLoading] = useState(false);
+
+  // Document Library States
+  const [libraryDocs, setLibraryDocs] = useState([]);
+  const [libraryLoading, setLibraryLoading] = useState(false);
+  const [libSearch, setLibSearch] = useState('');
+  const [libCategoryFilter, setLibCategoryFilter] = useState('All');
+  const [libSubCatFilter, setLibSubCatFilter] = useState('All');
   const [concernMsg, setConcernMsg] = useState({ text: '', isError: false });
   const [dlSaving, setDlSaving] = useState(false);
 
@@ -134,6 +141,8 @@ export default function Page() {
         fetchPendingDocs();
       } else if (activeTab === 'deadlines') {
         fetchDeadlines();
+      } else if (activeTab === 'library') {
+        fetchLibraryDocs();
       } else if (activeTab === 'concerns' && user.role === 'admin') {
         fetchConcerns();
       } else if (activeTab === 'accounts' && user.role === 'admin') {
@@ -172,6 +181,21 @@ export default function Page() {
       console.error('Failed to load documents:', err);
     } finally {
       setDataLoading(false);
+    }
+  };
+
+  const fetchLibraryDocs = async () => {
+    setLibraryLoading(true);
+    try {
+      const res = await fetch('/api/getLibraryDocuments');
+      const data = await res.json();
+      if (res.ok) {
+        setLibraryDocs(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Failed to load library docs:', err);
+    } finally {
+      setLibraryLoading(false);
     }
   };
 
@@ -1034,6 +1058,174 @@ export default function Page() {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: DOCUMENT LIBRARY (ALL OFFICERS & OFFICE / ADMIN) */}
+        {activeTab === 'library' && user && (user.role === 'admin' || user.role === 'SK' || user.role === 'LYDC') && (
+          <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/10 pb-4">
+              <div>
+                <h1 className="text-2xl font-extrabold text-gold-gradient uppercase tracking-wider">Document Library</h1>
+                <p className="text-xs text-white/50">Shared repository of all approved official files across Palayan City LYDO, LYDC, and SK Barangays</p>
+              </div>
+              <button
+                onClick={fetchLibraryDocs}
+                disabled={libraryLoading}
+                className="px-3 py-2.5 rounded-lg border border-gold/20 hover:bg-gold/10 text-gold text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                title="Refresh library"
+              >
+                {libraryLoading ? 'Syncing...' : 'Sync Repository'}
+              </button>
+            </div>
+
+            {/* Filter controls */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-forest-dark/45 p-4 rounded-xl border border-white/5">
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] text-white/40 uppercase font-semibold">Search File or Owner</label>
+                <input
+                  type="text"
+                  placeholder="Type to search..."
+                  value={libSearch}
+                  onChange={e => setLibSearch(e.target.value)}
+                  className="input-field text-xs py-2 px-3"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] text-white/40 uppercase font-semibold">Filter Category</label>
+                <select
+                  value={libCategoryFilter}
+                  onChange={e => setLibCategoryFilter(e.target.value)}
+                  className="input-field text-xs py-2 px-3 cursor-pointer"
+                >
+                  <option value="All" className="bg-forest-dark text-white">All Categories</option>
+                  {DOCUMENT_CATEGORIES.map(cat => (
+                    <option key={cat} value={cat} className="bg-forest-dark text-white">{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] text-white/40 uppercase font-semibold">Filter Entity / Folder</label>
+                <select
+                  value={libSubCatFilter}
+                  onChange={e => setLibSubCatFilter(e.target.value)}
+                  className="input-field text-xs py-2 px-3 cursor-pointer"
+                >
+                  <option value="All" className="bg-forest-dark text-white">All Directories</option>
+                  <optgroup label="LYDO Main" className="bg-forest-dark text-white font-semibold">
+                    <option value="LYDO" className="bg-forest-dark text-white">LYDO Office</option>
+                  </optgroup>
+                  <optgroup label="Barangays" className="bg-forest-dark text-white font-semibold">
+                    {BARANGAYS.map(b => (
+                      <option key={b} value={b} className="bg-forest-dark text-white">{b}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="LYDC Centers" className="bg-forest-dark text-white font-semibold">
+                    {LYDC_CENTERS.map(c => (
+                      <option key={c} value={c} className="bg-forest-dark text-white">{c}</option>
+                    ))}
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+
+            {/* Document Grid / Table */}
+            <div className="glass-panel rounded-xl p-5 border border-gold/15 flex flex-col gap-4">
+              {libraryLoading ? (
+                <div className="py-20 text-center text-white/30 text-xs">
+                  Loading files from storage library...
+                </div>
+              ) : (
+                (() => {
+                  const filtered = libraryDocs.filter(doc => {
+                    // Search term
+                    const term = libSearch.toLowerCase().trim();
+                    const matchesSearch = !term || 
+                      doc.name.toLowerCase().includes(term) || 
+                      (doc.uploaderName && doc.uploaderName.toLowerCase().includes(term)) ||
+                      (doc.uploadedBy && doc.uploadedBy.toLowerCase().includes(term));
+
+                    // Category filter
+                    const matchesCat = libCategoryFilter === 'All' || doc.category === libCategoryFilter;
+
+                    // SubCat filter
+                    const matchesSubCat = libSubCatFilter === 'All' || doc.subCategory === libSubCatFilter;
+
+                    return matchesSearch && matchesCat && matchesSubCat;
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="py-20 text-center text-white/30 text-xs">
+                        No approved documents found matching the selected filters.
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="border-b border-white/10 text-white/50 font-semibold uppercase tracking-wider">
+                            <th className="py-3 px-4">Document Title</th>
+                            <th className="py-3 px-4">Category</th>
+                            <th className="py-3 px-4">Directory / Folder</th>
+                            <th className="py-3 px-4">Uploaded By</th>
+                            <th className="py-3 px-4">Date Uploaded</th>
+                            <th className="py-3 px-4 text-center">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-white/80">
+                          {filtered.map(doc => (
+                            <tr key={doc.fileId} className="hover:bg-white/5 transition-all">
+                              <td className="py-3 px-4 font-bold text-white max-w-xs truncate">
+                                {doc.name}
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-white/70">
+                                  {doc.category}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 font-semibold text-gold">
+                                {doc.subCategory}
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-white">{doc.uploaderName || doc.uploadedBy || 'N/A'}</span>
+                                  <span className={`text-[9px] uppercase font-extrabold tracking-wider ${
+                                    doc.userType === 'admin' ? 'text-red-400' :
+                                    doc.userType === 'LYDC' ? 'text-purple-400' :
+                                    'text-amber-400'
+                                  }`}>
+                                    {doc.userType === 'admin' ? 'LYDO Office' : doc.userType}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-white/50">
+                                {formatSafeDate(doc.date)}
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                <a
+                                  href={doc.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gold-gradient text-forest-dark font-extrabold text-[10px] uppercase tracking-wider hover:opacity-90 shadow transition-all"
+                                >
+                                  View / Download
+                                </a>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()
+              )}
             </div>
           </div>
         )}
