@@ -100,9 +100,16 @@ export default function ScholarDashboard({ user }) {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    let finalValue = type === 'checkbox' ? checked : value;
+    
+    if (name === 'contactNumber' || name === 'parentContact') {
+      // Strip all non-digits and limit to 11 characters
+      finalValue = value.replace(/\D/g, '').slice(0, 11);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: finalValue
     }));
   };
 
@@ -129,6 +136,24 @@ export default function ScholarDashboard({ user }) {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    // Validate email domain (must be @gmail.com)
+    if (!formData.email.toLowerCase().endsWith('@gmail.com')) {
+      setError('Email address must be a valid @gmail.com address.');
+      return;
+    }
+
+    // Validate phone number length (must be exactly 11 digits)
+    if (formData.contactNumber.length !== 11) {
+      setError('Student contact number must be exactly 11 digits (e.g. 09123456789).');
+      return;
+    }
+
+    if (formData.parentContact.length !== 11) {
+      setError('Parent/Guardian contact number must be exactly 11 digits (e.g. 09123456789).');
+      return;
+    }
+
     setSubmitting(true);
 
     // Validate uploads for first submission
@@ -679,11 +704,28 @@ export default function ScholarDashboard({ user }) {
             </div>
             <div className="flex flex-col">
               <label className="input-label">Contact Number *</label>
-              <input type="tel" name="contactNumber" required placeholder="09xxxxxxxxx" value={formData.contactNumber} onChange={handleInputChange} className="input-field text-sm" />
+              <input 
+                type="tel" 
+                name="contactNumber" 
+                required 
+                placeholder="09123456789 (11 digits)" 
+                value={formData.contactNumber} 
+                onChange={handleInputChange} 
+                className="input-field text-sm font-mono" 
+                maxLength={11} 
+              />
             </div>
             <div className="flex flex-col">
-              <label className="input-label">Email Address *</label>
-              <input type="email" name="email" required placeholder="name@email.com" value={formData.email} onChange={handleInputChange} className="input-field text-sm" />
+              <label className="input-label">Email Address (Gmail Only) *</label>
+              <input 
+                type="email" 
+                name="email" 
+                required 
+                placeholder="username@gmail.com" 
+                value={formData.email} 
+                onChange={handleInputChange} 
+                className="input-field text-sm" 
+              />
             </div>
             <div className="flex flex-col md:col-span-2">
               <label className="input-label">Barangay Address *</label>
@@ -800,7 +842,16 @@ export default function ScholarDashboard({ user }) {
             </div>
             <div className="flex flex-col">
               <label className="input-label">Parent/Guardian Contact No. *</label>
-              <input type="tel" name="parentContact" required value={formData.parentContact} onChange={handleInputChange} className="input-field text-sm" />
+              <input 
+                type="tel" 
+                name="parentContact" 
+                required 
+                placeholder="09123456789 (11 digits)" 
+                value={formData.parentContact} 
+                onChange={handleInputChange} 
+                className="input-field text-sm font-mono" 
+                maxLength={11} 
+              />
             </div>
             <div className="flex flex-col">
               <label className="input-label">Monthly Family Income (Php) *</label>
