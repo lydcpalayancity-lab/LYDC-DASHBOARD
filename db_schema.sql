@@ -110,7 +110,8 @@ CREATE TABLE IF NOT EXISTS deadlines (
     id VARCHAR(50) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     date TIMESTAMP WITH TIME ZONE NOT NULL,
-    created_by VARCHAR(50) REFERENCES users(username) ON DELETE SET NULL
+    created_by VARCHAR(50) REFERENCES users(username) ON DELETE SET NULL,
+    target_role VARCHAR(50) DEFAULT 'all'
 );
 
 -- Audit Logs Table

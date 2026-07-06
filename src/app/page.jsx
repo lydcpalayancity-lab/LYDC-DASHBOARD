@@ -62,6 +62,7 @@ export default function Page() {
   // Admin Manage Deadlines Form States
   const [dlTitle, setDlTitle] = useState('');
   const [dlDate, setDlDate] = useState('');
+  const [dlTargetRole, setDlTargetRole] = useState('all');
 
   // Report Concern States
   const [isConcernOpen, setIsConcernOpen] = useState(false);
@@ -385,11 +386,12 @@ export default function Page() {
       const res = await fetch('/api/adminSaveDeadline', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: dlTitle, date: dlDate })
+        body: JSON.stringify({ title: dlTitle, date: dlDate, targetRole: dlTargetRole })
       });
       if (res.ok) {
         setDlTitle('');
         setDlDate('');
+        setDlTargetRole('all');
         fetchDeadlines();
       }
     } catch (err) {
@@ -933,6 +935,20 @@ export default function Page() {
                       />
                     </div>
 
+                    <div className="flex flex-col">
+                      <label className="input-label text-[11px]">Target Audience / Role *</label>
+                      <select
+                        value={dlTargetRole}
+                        onChange={e => setDlTargetRole(e.target.value)}
+                        className="input-field text-xs cursor-pointer"
+                      >
+                        <option value="all" className="bg-forest-dark text-white">Everyone / All Roles</option>
+                        <option value="scholar" className="bg-forest-dark text-white">Scholars Only</option>
+                        <option value="SK" className="bg-forest-dark text-white">SK Barangay Officers</option>
+                        <option value="LYDC" className="bg-forest-dark text-white">LYDO Office / LYDC Officers</option>
+                      </select>
+                    </div>
+
                     <button
                       type="submit"
                       disabled={dlSaving}
@@ -954,31 +970,55 @@ export default function Page() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {deadlines.length === 0 ? (
+                  {deadlines.filter(dl => {
+                    if (isAdmin) return true;
+                    return dl.target_role === 'all' || dl.target_role === user.role;
+                  }).length === 0 ? (
                     <div className="col-span-2 py-12 text-center text-white/30">
                       No active deadlines scheduled.
                     </div>
                   ) : (
-                    deadlines.map(dl => {
-                      const dVal = dl.date ? new Date(dl.date) : null;
-                      const isExpired = dVal && !isNaN(dVal.getTime()) ? dVal < new Date() : false;
-                      return (
-                        <div key={dl.id} className={`glass-card border rounded-xl p-4 flex items-center justify-between gap-4 ${isExpired ? 'border-red-500/20 bg-red-500/5' : 'border-white/10'}`}>
-                          <div>
-                            <h4 className="font-bold text-white leading-snug">{dl.title}</h4>
-                            <p className="text-xs text-white/50 mt-1">
-                              Due: {formatSafeDate(dl.date)}
-                            </p>
-                            {isExpired ? (
-                              <span className="inline-block mt-2 px-2 py-0.5 rounded bg-red-500/10 text-[9px] font-bold uppercase text-red-400 border border-red-500/20">
-                                Past Due / Expired
-                              </span>
-                            ) : (
-                              <span className="inline-block mt-2 px-2 py-0.5 rounded bg-green-500/10 text-[9px] font-bold uppercase text-green-400 border border-green-500/20">
-                                Active / Incoming
-                              </span>
-                            )}
-                          </div>
+                    deadlines
+                      .filter(dl => {
+                        if (isAdmin) return true;
+                        return dl.target_role === 'all' || dl.target_role === user.role;
+                      })
+                      .map(dl => {
+                        const dVal = dl.date ? new Date(dl.date) : null;
+                        const isExpired = dVal && !isNaN(dVal.getTime()) ? dVal < new Date() : false;
+                        return (
+                          <div key={dl.id} className={`glass-card border rounded-xl p-4 flex items-center justify-between gap-4 ${isExpired ? 'border-red-500/20 bg-red-500/5' : 'border-white/10'}`}>
+                            <div>
+                              <h4 className="font-bold text-white leading-snug">{dl.title}</h4>
+                              <p className="text-xs text-white/50 mt-1">
+                                Due: {formatSafeDate(dl.date)}
+                              </p>
+                              
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                {isExpired ? (
+                                  <span className="inline-block px-2 py-0.5 rounded bg-red-500/10 text-[9px] font-bold uppercase text-red-400 border border-red-500/20">
+                                    Expired
+                                  </span>
+                                ) : (
+                                  <span className="inline-block px-2 py-0.5 rounded bg-green-500/10 text-[9px] font-bold uppercase text-green-400 border border-green-500/20">
+                                    Active
+                                  </span>
+                                )}
+                                <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${
+                                  dl.target_role === 'scholar' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' :
+                                  dl.target_role === 'SK' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                                  dl.target_role === 'LYDC' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' :
+                                  'bg-white/5 border-white/10 text-white/60'
+                                }`}>
+                                  For: {
+                                    dl.target_role === 'scholar' ? 'Scholars' :
+                                    dl.target_role === 'SK' ? 'SK Barangay' :
+                                    dl.target_role === 'LYDC' ? 'LYDO Office' :
+                                    'Everyone'
+                                  }
+                                </span>
+                              </div>
+                            </div>
                           {isAdmin && (
                             <button
                               onClick={() => handleDeleteDeadline(dl.id)}

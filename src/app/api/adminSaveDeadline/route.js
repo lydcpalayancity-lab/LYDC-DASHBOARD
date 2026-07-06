@@ -9,7 +9,14 @@ export async function POST(req) {
       return NextResponse.json({ error: 'ACCESS_DENIED: Admin permissions required.' }, { status: 403 });
     }
 
-    const { id, title, date } = await req.json();
+    // Automatically migrate column to deadlines if not exists
+    try {
+      await query(`ALTER TABLE deadlines ADD COLUMN IF NOT EXISTS target_role VARCHAR(50) DEFAULT 'all'`);
+    } catch (migErr) {
+      console.warn('Deadlines column migration warning:', migErr.message);
+    }
+
+    const { id, title, date, targetRole } = await req.json();
 
     if (!title || !date) {
       return NextResponse.json({ error: 'Title and date are required.' }, { status: 400 });
@@ -19,13 +26,14 @@ export async function POST(req) {
 
     // Upsert into Supabase
     await query(
-      `INSERT INTO deadlines (id, title, date, created_by)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO deadlines (id, title, date, created_by, target_role)
+       VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT (id) DO UPDATE SET
          title = EXCLUDED.title,
          date = EXCLUDED.date,
-         created_by = EXCLUDED.created_by`,
-      [targetId, title, new Date(date), session.username]
+         created_by = EXCLUDED.created_by,
+         target_role = EXCLUDED.target_role`,
+      [targetId, title, new Date(date), session.username, targetRole || 'all']
     );
 
     // Log to audit log
