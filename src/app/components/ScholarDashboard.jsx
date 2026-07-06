@@ -113,6 +113,51 @@ export default function ScholarDashboard({ user }) {
     }));
   };
 
+  const handleNextStep = () => {
+    setError('');
+    
+    if (step === 1) {
+      // Validate Step 1 (Personal Profile)
+      if (!formData.lastName.trim() || !formData.firstName.trim() || !formData.dateOfBirth || !formData.contactNumber || !formData.email) {
+        setError('Please fill up all required fields in this step.');
+        return;
+      }
+      
+      if (!formData.email.toLowerCase().endsWith('@gmail.com')) {
+        setError('Email address must be a valid @gmail.com address.');
+        return;
+      }
+      
+      if (formData.contactNumber.length !== 11) {
+        setError('Student contact number must be exactly 11 digits (e.g. 09123456789).');
+        return;
+      }
+    }
+    
+    if (step === 2) {
+      // Validate Step 2 (Educational Background)
+      if (!formData.schoolEnrolled.trim() || !formData.courseProgram.trim() || !formData.gwa) {
+        setError('Please fill up all required fields in this step.');
+        return;
+      }
+    }
+    
+    if (step === 3) {
+      // Validate Step 3 (Family Background)
+      if (!formData.parentGuardianName.trim() || !formData.relationship.trim() || !formData.parentContact || !formData.monthlyIncome || !formData.sourceOfIncome) {
+        setError('Please fill up all required fields in this step.');
+        return;
+      }
+      
+      if (formData.parentContact.length !== 11) {
+        setError('Parent/Guardian contact number must be exactly 11 digits (e.g. 09123456789).');
+        return;
+      }
+    }
+
+    setStep(prev => Math.min(5, prev + 1));
+  };
+
   const handleFileChange = (e, key) => {
     const file = e.target.files[0];
     if (file) {
@@ -140,17 +185,20 @@ export default function ScholarDashboard({ user }) {
     // Validate email domain (must be @gmail.com)
     if (!formData.email.toLowerCase().endsWith('@gmail.com')) {
       setError('Email address must be a valid @gmail.com address.');
+      setStep(1); // Redirect to Step 1 where email field lives
       return;
     }
 
     // Validate phone number length (must be exactly 11 digits)
     if (formData.contactNumber.length !== 11) {
       setError('Student contact number must be exactly 11 digits (e.g. 09123456789).');
+      setStep(1); // Redirect to Step 1 where student contact lives
       return;
     }
 
     if (formData.parentContact.length !== 11) {
       setError('Parent/Guardian contact number must be exactly 11 digits (e.g. 09123456789).');
+      setStep(3); // Redirect to Step 3 where parent contact lives
       return;
     }
 
@@ -975,7 +1023,10 @@ export default function ScholarDashboard({ user }) {
         <div className="flex justify-between items-center border-t border-white/10 pt-6 mt-4">
           <button
             type="button"
-            onClick={() => setStep(prev => Math.max(1, prev - 1))}
+            onClick={() => {
+              setError('');
+              setStep(prev => Math.max(1, prev - 1));
+            }}
             disabled={step === 1 || submitting}
             className="px-5 py-3 rounded-lg border border-white/10 hover:bg-white/5 text-white/80 disabled:opacity-30 disabled:pointer-events-none text-xs font-bold uppercase transition-all cursor-pointer"
           >
@@ -985,7 +1036,7 @@ export default function ScholarDashboard({ user }) {
           {step < 5 ? (
             <button
               type="button"
-              onClick={() => setStep(prev => Math.min(5, prev + 1))}
+              onClick={handleNextStep}
               className="px-5 py-3 rounded-lg bg-gold-gradient text-forest-dark font-bold text-xs uppercase tracking-wider transition-all cursor-pointer glow-btn"
             >
               Continue
