@@ -210,25 +210,26 @@ export default function ScholarDashboard({ user }) {
     };
 
     return (
-      <div className="flex flex-col gap-6 w-full">
-        {/* Status Dashboard Banner */}
-        <div className="glass-panel rounded-2xl p-8 border border-gold/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="flex flex-col gap-3">
-            <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">Application Status</span>
-            <div className="flex items-center gap-3">
-              <span className={`px-4 py-1.5 rounded-full border text-sm font-bold uppercase tracking-wider ${statusColors[app.status]}`}>
-                {app.status}
-              </span>
-              {app.status === 'Approved' && (
-                <span className="text-sm font-bold text-gold-gradient animate-bounce">
-                  ✨ Congratulations!
+      <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
+        {/* Top Banner and Financial Summary Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Status Dashboard Banner */}
+          <div className="xl:col-span-2 glass-panel rounded-2xl p-6 md:p-8 border border-gold/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="flex flex-col gap-3">
+              <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">Application Status</span>
+              <div className="flex items-center gap-3">
+                <span className={`px-4 py-1.5 rounded-full border text-sm font-bold uppercase tracking-wider ${statusColors[app.status]}`}>
+                  {app.status}
                 </span>
-              )}
+                {app.status === 'Approved' && (
+                  <span className="text-sm font-bold text-gold-gradient animate-bounce">
+                    ✨ Approved Scholar
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-white/50">Submitted on: {new Date(app.date_filed).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
             </div>
-            <p className="text-xs text-white/50">Submitted on: {new Date(app.date_filed).toLocaleDateString()}</p>
-          </div>
 
-          <div className="flex gap-4">
             <button
               onClick={() => {
                 setFormData({
@@ -271,10 +272,47 @@ export default function ScholarDashboard({ user }) {
                 });
                 setIsEditing(true);
               }}
-              className="px-5 py-3 rounded-lg border border-gold/30 hover:bg-gold/10 text-gold text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+              className="px-5 py-3 rounded-lg border border-gold/30 hover:bg-gold/10 text-gold text-xs font-bold uppercase tracking-wider transition-all cursor-pointer w-full sm:w-auto text-center"
             >
               Update / Edit Form
             </button>
+          </div>
+
+          {/* Financial Grant Summary Card */}
+          <div className="glass-panel rounded-2xl p-6 border border-gold/20 bg-gold/5 flex flex-col justify-between gap-4">
+            <div className="flex justify-between items-start">
+              <div className="flex flex-col gap-1">
+                <span className="text-white/50 text-[10px] uppercase font-bold tracking-wider">Financial Grant Summary</span>
+                <h4 className="text-lg font-bold text-gold-gradient">Palayan Youth Assistance</h4>
+              </div>
+              <div className="p-2 bg-gold/15 rounded-lg border border-gold/30">
+                <svg className="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-end border-t border-white/5 pt-3">
+              <div>
+                <span className="text-white/40 text-[9px] uppercase font-semibold">Scholarship Budget Allocation</span>
+                <p className="text-2xl font-extrabold text-white mt-0.5">₱2,500.00 <span className="text-xs font-normal text-white/50">/ term</span></p>
+              </div>
+              <div className="text-right">
+                <span className="text-white/40 text-[9px] uppercase font-semibold">Annual Assistance Fund</span>
+                <p className="text-sm font-bold text-gold mt-0.5">₱600,000.00</p>
+              </div>
+            </div>
+
+            <div className="text-[10px] text-white/50 flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>
+                {app.status === 'Approved' 
+                  ? 'Disbursement active for current semester.' 
+                  : 'Grant allocation reserved pending approval.'}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -325,69 +363,215 @@ export default function ScholarDashboard({ user }) {
           </div>
         )}
 
-        {/* Info Grid */}
+        {/* Detailed Application Dossier */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Submission Details */}
-          <div className="glass-panel rounded-xl p-6 flex flex-col gap-4">
-            <h3 className="text-md font-bold text-gold border-b border-white/10 pb-2">Academic & School Context</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+          {/* Panel 1: Personal Profile */}
+          <div className="glass-panel rounded-xl p-6 border border-white/5 flex flex-col gap-4">
+            <h3 className="text-sm font-bold text-gold border-b border-white/10 pb-2 uppercase tracking-wider flex items-center gap-2">
+              <svg className="w-4 h-4 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              1. Personal Profile
+            </h3>
+            <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
               <div>
-                <p className="text-white/45 text-xs">School Enrolled</p>
-                <p className="font-semibold text-white mt-1 truncate">{app.school_enrolled}</p>
+                <p className="text-white/40 font-semibold">Full Name</p>
+                <p className="font-bold text-white mt-0.5 truncate">{app.first_name} {app.middle_name} {app.last_name} {app.suffix}</p>
               </div>
               <div>
-                <p className="text-white/45 text-xs">Course / Program</p>
-                <p className="font-semibold text-white mt-1 truncate">{app.course_program}</p>
+                <p className="text-white/40 font-semibold">Date of Birth</p>
+                <p className="font-bold text-white mt-0.5">{app.date_of_birth ? new Date(app.date_of_birth).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
               </div>
               <div>
-                <p className="text-white/45 text-xs">Year Level</p>
-                <p className="font-semibold text-white mt-1">{app.year_level}</p>
+                <p className="text-white/40 font-semibold">Sex / Gender</p>
+                <p className="font-bold text-white mt-0.5">{app.sex}</p>
               </div>
               <div>
-                <p className="text-white/45 text-xs">General Weighted Average (GWA)</p>
-                <p className="font-semibold text-gold mt-1">{app.gwa} ({app.gwa_scale === '5' ? '1.00-5.00 Scale' : '100-point scale'})</p>
+                <p className="text-white/40 font-semibold">Civil Status</p>
+                <p className="font-bold text-white mt-0.5">{app.civil_status}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">Contact Number</p>
+                <p className="font-bold text-white mt-0.5">{app.contact_number}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">Email Address</p>
+                <p className="font-bold text-white mt-0.5 truncate">{app.email}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-white/40 font-semibold">Registered Barangay</p>
+                <p className="font-bold text-gold mt-0.5">{app.barangay}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-white/40 font-semibold">Residential Address</p>
+                <p className="font-bold text-white/80 mt-0.5 leading-relaxed">{app.address}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Panel 2: Academic Profile */}
+          <div className="glass-panel rounded-xl p-6 border border-white/5 flex flex-col gap-4">
+            <h3 className="text-sm font-bold text-gold border-b border-white/10 pb-2 uppercase tracking-wider flex items-center gap-2">
+              <svg className="w-4 h-4 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+              2. Academic Profile
+            </h3>
+            <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+              <div className="col-span-2">
+                <p className="text-white/40 font-semibold">School Enrolled</p>
+                <p className="font-bold text-white mt-0.5 truncate" title={app.school_enrolled}>{app.school_enrolled}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">Course / Program</p>
+                <p className="font-bold text-white mt-0.5 truncate" title={app.course_program}>{app.course_program}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">Year Level</p>
+                <p className="font-bold text-white mt-0.5">{app.year_level}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">Student ID Number</p>
+                <p className="font-bold text-white mt-0.5 font-mono">{app.student_id_no || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">General Weighted Average (GWA)</p>
+                <p className="font-bold text-gold mt-0.5">{app.gwa} <span className="text-[10px] text-white/40 font-normal">({app.gwa_scale === '5' ? '1.0-5.0 scale' : '100-pt scale'})</span></p>
+              </div>
+
+              {/* Quarterly grades breakdown if available */}
+              {(app.q1_grade || app.q2_grade || app.q3_grade || app.q4_grade) && (
+                <div className="col-span-2 bg-white/5 border border-white/10 rounded-lg p-2.5 mt-1">
+                  <p className="text-white/40 text-[9px] uppercase font-bold tracking-wider mb-2">Quarterly Grades Breakdown</p>
+                  <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-bold text-white/90">
+                    <div className="bg-white/5 py-1 rounded">
+                      <span className="text-white/40 block text-[8px] uppercase">Q1</span>
+                      {app.q1_grade || '—'}
+                    </div>
+                    <div className="bg-white/5 py-1 rounded">
+                      <span className="text-white/40 block text-[8px] uppercase">Q2</span>
+                      {app.q2_grade || '—'}
+                    </div>
+                    <div className="bg-white/5 py-1 rounded">
+                      <span className="text-white/40 block text-[8px] uppercase">Q3</span>
+                      {app.q3_grade || '—'}
+                    </div>
+                    <div className="bg-white/5 py-1 rounded">
+                      <span className="text-white/40 block text-[8px] uppercase">Q4</span>
+                      {app.q4_grade || '—'}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Panel 3: Household & Socio-Economic */}
+          <div className="glass-panel rounded-xl p-6 border border-white/5 flex flex-col gap-4">
+            <h3 className="text-sm font-bold text-gold border-b border-white/10 pb-2 uppercase tracking-wider flex items-center gap-2">
+              <svg className="w-4 h-4 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+              3. Family & Household Profile
+            </h3>
+            <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+              <div>
+                <p className="text-white/40 font-semibold">Parent / Guardian Name</p>
+                <p className="font-bold text-white mt-0.5 truncate">{app.parent_guardian_name}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">Relationship</p>
+                <p className="font-bold text-white mt-0.5">{app.relationship}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">Parent Contact Number</p>
+                <p className="font-bold text-white mt-0.5">{app.parent_contact}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">Monthly Household Income</p>
+                <p className="font-bold text-gold mt-0.5">₱{parseFloat(app.monthly_income).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">Number of Dependents</p>
+                <p className="font-bold text-white mt-0.5">{app.num_dependents}</p>
+              </div>
+              <div>
+                <p className="text-white/40 font-semibold">Source of Income</p>
+                <p className="font-bold text-white mt-0.5 truncate" title={app.source_of_income}>{app.source_of_income}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Panel 4: Special Circumstances & Leadership */}
+          <div className="glass-panel rounded-xl p-6 border border-white/5 flex flex-col gap-4">
+            <h3 className="text-sm font-bold text-gold border-b border-white/10 pb-2 uppercase tracking-wider flex items-center gap-2">
+              <svg className="w-4 h-4 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+              4. Sectoral Context & Leadership
+            </h3>
+            <div className="flex flex-col gap-3 text-xs">
+              <div>
+                <p className="text-white/40 font-semibold mb-1.5">Special Circumstances / Vulnerabilities</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {app.is_solo_parent_beneficiary && <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/80 text-[10px] font-medium">Solo Parent Beneficiary</span>}
+                  {app.is_orphan && <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/80 text-[10px] font-medium">Orphan</span>}
+                  {app.is_pwd && <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/80 text-[10px] font-medium">PWD</span>}
+                  {app.is_ip && <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/80 text-[10px] font-medium">Indigenous People (IP)</span>}
+                  {app.is_out_of_school_youth && <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/80 text-[10px] font-medium">OSY Returnee</span>}
+                  {app.is_marginalized && <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/80 text-[10px] font-medium">Marginalized Sector</span>}
+                  {!app.is_solo_parent_beneficiary && !app.is_orphan && !app.is_pwd && !app.is_ip && !app.is_out_of_school_youth && !app.is_marginalized && (
+                    <span className="text-white/45 italic text-[11px]">None declared</span>
+                  )}
+                </div>
+                {app.special_circumstances_specify && (
+                  <p className="text-[11px] text-white/70 bg-white/5 border border-white/10 rounded-lg p-2 mt-2 leading-relaxed italic">
+                    "{app.special_circumstances_specify}"
+                  </p>
+                )}
+              </div>
+              <div className="border-t border-white/5 pt-3">
+                <p className="text-white/40 font-semibold mb-1">Leadership Involvements & Activities</p>
+                <p className="text-white/80 leading-relaxed font-medium bg-white/5 border border-white/10 rounded-lg p-2.5 text-[11px] whitespace-pre-line max-h-32 overflow-y-auto">
+                  {app.leadership_activities || 'No extra-curricular involvements declared.'}
+                </p>
               </div>
             </div>
           </div>
 
           {/* Documentary Requirements Links */}
-          <div className="glass-panel rounded-xl p-6 flex flex-col gap-4">
-            <h3 className="text-md font-bold text-gold border-b border-white/10 pb-2">Submitted Documentary Requirements</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="glass-panel rounded-xl p-6 border border-white/5 lg:col-span-2 flex flex-col gap-4">
+            <h3 className="text-sm font-bold text-gold border-b border-white/10 pb-2 uppercase tracking-wider flex items-center gap-2">
+              <svg className="w-4 h-4 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              5. Submitted Documentary Verification (PDFs)
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {app.letter_to_mayor_url && (
-                <a href={app.letter_to_mayor_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
-                  <svg className="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                  Letter to City Mayor
+                <a href={app.letter_to_mayor_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 hover:bg-white/10 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
+                  <svg className="w-5 h-5 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span className="truncate">Letter to City Mayor</span>
                 </a>
               )}
               {app.valid_id_url && (
-                <a href={app.valid_id_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
-                  <svg className="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                  Student Valid ID
+                <a href={app.valid_id_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 hover:bg-white/10 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
+                  <svg className="w-5 h-5 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span className="truncate">Student Valid ID</span>
                 </a>
               )}
               {app.enrollment_cert_url && (
-                <a href={app.enrollment_cert_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
-                  <svg className="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                  Certificate of Enrollment
+                <a href={app.enrollment_cert_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 hover:bg-white/10 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
+                  <svg className="w-5 h-5 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span className="truncate">Certificate of Enrollment</span>
                 </a>
               )}
               {app.grade_transcript_url && (
-                <a href={app.grade_transcript_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
-                  <svg className="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                  Latest Grade Transcript
+                <a href={app.grade_transcript_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 hover:bg-white/10 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
+                  <svg className="w-5 h-5 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span className="truncate">Latest Grade Transcript</span>
                 </a>
               )}
               {app.barangay_clearance_url && (
-                <a href={app.barangay_clearance_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
-                  <svg className="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                  Barangay Clearance
+                <a href={app.barangay_clearance_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 hover:bg-white/10 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
+                  <svg className="w-5 h-5 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span className="truncate">Barangay Clearance</span>
                 </a>
               )}
               {app.special_id_url && (
-                <a href={app.special_id_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
-                  <svg className="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                  PWD / IP / Solo Parent ID
+                <a href={app.special_id_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 hover:border-gold/30 hover:bg-white/10 rounded-lg text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer">
+                  <svg className="w-5 h-5 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span className="truncate">PWD / IP / Solo Parent ID</span>
                 </a>
               )}
             </div>
