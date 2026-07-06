@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS scholar_applications (
     email VARCHAR(100) NOT NULL,
     
     -- II. Educational Background
-    school_enrolled VARCHAR(150) NOT NULL,
-    course_program VARCHAR(150) NOT NULL,
+    school_enrolled VARCHAR(255) NOT NULL,
+    course_program VARCHAR(255) NOT NULL,
     year_level VARCHAR(20) NOT NULL,
     student_id_no VARCHAR(50),
     gwa NUMERIC(5,2) NOT NULL,
@@ -45,12 +45,12 @@ CREATE TABLE IF NOT EXISTS scholar_applications (
     q4_grade NUMERIC(5,2),
     
     -- III. Family & Socio-Economic Background
-    parent_guardian_name VARCHAR(100) NOT NULL,
+    parent_guardian_name VARCHAR(255) NOT NULL,
     relationship VARCHAR(50) NOT NULL,
     parent_contact VARCHAR(20) NOT NULL,
     monthly_income NUMERIC(10,2) NOT NULL,
     num_dependents INTEGER NOT NULL,
-    source_of_income VARCHAR(100) NOT NULL,
+    source_of_income VARCHAR(255) NOT NULL,
     
     -- IV. Special Circumstances
     is_solo_parent_beneficiary BOOLEAN DEFAULT FALSE,
@@ -65,17 +65,17 @@ CREATE TABLE IF NOT EXISTS scholar_applications (
     leadership_activities TEXT,
     
     -- Google Drive File Metadata (Documentary Requirements)
-    letter_to_mayor_file_id VARCHAR(100),
+    letter_to_mayor_file_id VARCHAR(255),
     letter_to_mayor_url TEXT,
-    valid_id_file_id VARCHAR(100),
+    valid_id_file_id VARCHAR(255),
     valid_id_url TEXT,
-    enrollment_cert_file_id VARCHAR(100),
+    enrollment_cert_file_id VARCHAR(255),
     enrollment_cert_url TEXT,
-    grade_transcript_file_id VARCHAR(100),
+    grade_transcript_file_id VARCHAR(255),
     grade_transcript_url TEXT,
-    barangay_clearance_file_id VARCHAR(100),
+    barangay_clearance_file_id VARCHAR(255),
     barangay_clearance_url TEXT,
-    special_id_file_id VARCHAR(100), -- PWD/IP/Solo Parent ID
+    special_id_file_id VARCHAR(255), -- PWD/IP/Solo Parent ID
     special_id_url TEXT,
     
     -- VI. Assessment Scoring (For Official Use Only)
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS scholar_applications (
 -- Documents Table (Logs metadata of files uploaded to Google Drive)
 CREATE TABLE IF NOT EXISTS documents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    file_id VARCHAR(100) NOT NULL UNIQUE,
+    file_id VARCHAR(255) NOT NULL UNIQUE,
     file_name VARCHAR(255) NOT NULL,
     file_url TEXT NOT NULL,
     category VARCHAR(100) NOT NULL,

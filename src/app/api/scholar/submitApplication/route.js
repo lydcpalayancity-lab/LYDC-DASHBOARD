@@ -13,6 +13,25 @@ export async function POST(req) {
       return NextResponse.json({ error: 'AUTH_EXPIRED: Only logged-in scholars can submit applications.' }, { status: 401 });
     }
 
+    // Automatically migrate column lengths in Supabase if not already done
+    try {
+      await query(`
+        ALTER TABLE scholar_applications ALTER COLUMN letter_to_mayor_file_id TYPE VARCHAR(255);
+        ALTER TABLE scholar_applications ALTER COLUMN valid_id_file_id TYPE VARCHAR(255);
+        ALTER TABLE scholar_applications ALTER COLUMN enrollment_cert_file_id TYPE VARCHAR(255);
+        ALTER TABLE scholar_applications ALTER COLUMN grade_transcript_file_id TYPE VARCHAR(255);
+        ALTER TABLE scholar_applications ALTER COLUMN barangay_clearance_file_id TYPE VARCHAR(255);
+        ALTER TABLE scholar_applications ALTER COLUMN special_id_file_id TYPE VARCHAR(255);
+        ALTER TABLE scholar_applications ALTER COLUMN parent_guardian_name TYPE VARCHAR(255);
+        ALTER TABLE scholar_applications ALTER COLUMN source_of_income TYPE VARCHAR(255);
+        ALTER TABLE scholar_applications ALTER COLUMN school_enrolled TYPE VARCHAR(255);
+        ALTER TABLE scholar_applications ALTER COLUMN course_program TYPE VARCHAR(255);
+        ALTER TABLE documents ALTER COLUMN file_id TYPE VARCHAR(255);
+      `);
+    } catch (migErr) {
+      console.warn('Database schema migration warning:', migErr.message);
+    }
+
     const body = await req.json();
     const {
       semesterSy,
