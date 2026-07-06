@@ -528,23 +528,41 @@ export default function Page() {
   // GATEWAY & LOGIN RENDER
   if (!user) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-forest-gradient p-4 select-none relative font-sans">
+      <main className="min-h-screen flex flex-col justify-between bg-forest-gradient p-4 md:p-8 select-none relative font-sans">
         {/* Glow Effects */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary-light/20 rounded-full blur-[150px] pointer-events-none" />
 
-        {/* Portal Gateway Selection */}
-        {!portalMode ? (
-          <div className="w-full max-w-2xl text-center flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-8 duration-500">
-            <div>
-              <div className="w-20 h-20 rounded-full bg-gold-gradient flex items-center justify-center font-bold text-forest-dark text-3xl shadow-xl border border-gold/30 mx-auto mb-4 glow-btn">
-                LY
-              </div>
-              <h1 className="text-4xl font-extrabold text-gold-gradient tracking-tight">Palayan City Youth Portal</h1>
-              <p className="text-white/70 text-sm mt-2">Local Youth Development Office Information Management System</p>
-            </div>
+        {/* Balanced Spacer */}
+        <div />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        {/* Content Container */}
+        <div className="w-full max-w-3xl mx-auto flex flex-col gap-8 items-center py-8">
+          
+          {/* Header Banner */}
+          <div className="w-full glass-panel border border-gold/20 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6 bg-forest-dark/30 shadow-xl text-center sm:text-left">
+            <img src="/palayan_seal.png" alt="Official Seal of Palayan City" className="h-16 sm:h-20 w-auto object-contain drop-shadow" />
+            <div className="flex-1 text-center sm:px-4">
+              <span className="text-[9px] sm:text-[10px] font-bold text-gold uppercase tracking-widest block mb-1">
+                Republic of the Philippines
+              </span>
+              <h1 className="text-lg sm:text-2xl font-extrabold text-white leading-tight">
+                Palayan City Youth Development Information Management System
+              </h1>
+              <span className="text-[10px] sm:text-xs font-semibold text-gold/80 block mt-2">
+                Secured under Resolution No. 4, Series of 2026
+              </span>
+              <span className="text-white/60 text-xs sm:text-sm font-medium mt-1 block">
+                Document Submission &amp; Records Portal
+              </span>
+            </div>
+            <img src="/lydc_logo.png" alt="LYDO Logo" className="h-16 sm:h-20 w-auto object-contain drop-shadow" />
+          </div>
+
+          {/* Body Section */}
+          {!portalMode ? (
+            /* Portal Gateway Selection */
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-500">
               {/* Officer Option */}
               <button
                 onClick={() => setPortalMode('officer')}
@@ -555,7 +573,7 @@ export default function Page() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white group-hover:text-gold-gradient">Officer / Admin Portal</h3>
-                  <p className="text-white/50 text-xs mt-1 max-w-xs">Access for LYDO Staff, Administrators, and Barangay SK Chairpersons</p>
+                  <p className="text-white/50 text-xs mt-1 max-w-xs text-center">Access for LYDO Staff, Administrators, and Barangay SK Chairpersons</p>
                 </div>
               </button>
 
@@ -569,89 +587,89 @@ export default function Page() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white group-hover:text-gold-gradient">Scholar Gateway</h3>
-                  <p className="text-white/50 text-xs mt-1 max-w-xs">Access for student financial assistance applicants and active scholars</p>
+                  <p className="text-white/50 text-xs mt-1 max-w-xs text-center">Access for student financial assistance applicants and active scholars</p>
                 </div>
               </button>
             </div>
-          </div>
-        ) : (
-          /* LOGIN SCREEN */
-          <div className="w-full max-w-md glass-panel border border-gold/25 rounded-2xl overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
-            {/* Back to modes */}
-            <button
-              onClick={() => {
-                setPortalMode(null);
-                setLoginError('');
-              }}
-              className="absolute top-4 left-4 text-white/50 hover:text-white flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-              Gateway
-            </button>
-
-            {/* Form Header */}
-            <div className="px-6 pt-12 pb-6 border-b border-white/10 text-center bg-white/5">
-              <h2 className="text-2xl font-bold text-gold-gradient capitalize">{portalMode} Sign In</h2>
-              <p className="text-xs text-white/50 mt-1">Please enter your portal access credentials</p>
-            </div>
-
-            {/* Login Form */}
-            <form onSubmit={handleLogin} className="p-6 flex flex-col gap-4">
-              {loginError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg">
-                  {loginError}
-                </div>
-              )}
-
-              <div className="flex flex-col">
-                <label className="input-label">Username</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Enter username"
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  className="input-field text-sm font-mono"
-                  disabled={loginLoading}
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="input-label">Password</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Enter password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="input-field text-sm"
-                  disabled={loginLoading}
-                />
-              </div>
-
+          ) : (
+            /* LOGIN SCREEN */
+            <div className="w-full max-w-md glass-panel border border-gold/25 rounded-2xl overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+              {/* Back to modes */}
               <button
-                type="submit"
-                disabled={loginLoading}
-                className="w-full mt-2 py-3 bg-gold-gradient text-forest-dark font-extrabold text-sm rounded-lg flex items-center justify-center gap-2 transition-all hover:shadow-lg glow-btn cursor-pointer disabled:opacity-50"
+                onClick={() => {
+                  setPortalMode(null);
+                  setLoginError('');
+                }}
+                className="absolute top-4 left-4 text-white/50 hover:text-white flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer"
               >
-                {loginLoading ? 'Authenticating...' : 'Sign In'}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                Gateway
               </button>
 
-              {portalMode === 'scholar' && (
-                <div className="text-center mt-3">
-                  <span className="text-xs text-white/50">New applicant? </span>
-                  <button
-                    type="button"
-                    onClick={() => setIsRegisterOpen(true)}
-                    className="text-xs text-gold font-bold hover:underline transition-all cursor-pointer"
-                  >
-                    Register as Scholar
-                  </button>
+              {/* Form Header */}
+              <div className="px-6 pt-12 pb-6 border-b border-white/10 text-center bg-white/5">
+                <h2 className="text-2xl font-bold text-gold-gradient capitalize">{portalMode} Sign In</h2>
+                <p className="text-xs text-white/50 mt-1">Please enter your portal access credentials</p>
+              </div>
+
+              {/* Login Form */}
+              <form onSubmit={handleLogin} className="p-6 flex flex-col gap-4">
+                {loginError && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg">
+                    {loginError}
+                  </div>
+                )}
+
+                <div className="flex flex-col">
+                  <label className="input-label">Username</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter username"
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    className="input-field text-sm font-mono"
+                    disabled={loginLoading}
+                  />
                 </div>
-              )}
-            </form>
-          </div>
-        )}
+
+                <div className="flex flex-col">
+                  <label className="input-label">Password</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="input-field text-sm"
+                    disabled={loginLoading}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loginLoading}
+                  className="w-full mt-2 py-3 bg-gold-gradient text-forest-dark font-extrabold text-sm rounded-lg flex items-center justify-center gap-2 transition-all hover:shadow-lg glow-btn cursor-pointer disabled:opacity-50"
+                >
+                  {loginLoading ? 'Authenticating...' : 'Sign In'}
+                </button>
+
+                {portalMode === 'scholar' && (
+                  <div className="text-center mt-3">
+                    <span className="text-xs text-white/50">New applicant? </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsRegisterOpen(true)}
+                      className="text-xs text-gold font-bold hover:underline transition-all cursor-pointer"
+                    >
+                      Register as Scholar
+                    </button>
+                  </div>
+                )}
+              </form>
+            </div>
+          )}
+        </div>
 
         {/* Scholar registration modal */}
         {isRegisterOpen && (
@@ -660,6 +678,28 @@ export default function Page() {
             onClose={() => setIsRegisterOpen(false)}
           />
         )}
+
+        {/* FOOTER BANNER WITH 4 LOGOS */}
+        <footer className="w-full max-w-2xl mx-auto text-center flex flex-col items-center gap-3 py-6 border-t border-white/10 mt-8">
+          <div className="text-white/60 text-xs font-semibold">
+            Palayan City Local Government Unit &middot; Youth Development Division
+          </div>
+          <div className="text-gold text-[10px] font-bold tracking-wide uppercase">
+            Secured under Resolution No. 4, Series of 2026
+          </div>
+          
+          {/* Logo Row */}
+          <div className="flex justify-center items-center gap-6 my-2 bg-white/5 px-6 py-2 rounded-xl border border-white/5">
+            <img src="/palayan_seal.png" alt="Official Seal of Palayan City" className="h-10 w-auto object-contain drop-shadow transition-all hover:scale-110" />
+            <img src="/sk_logo.png" alt="SK Barangay Logo" className="h-10 w-auto object-contain drop-shadow transition-all hover:scale-110" />
+            <img src="/lydc_logo.png" alt="LYDC Logo" className="h-10 w-auto object-contain drop-shadow transition-all hover:scale-110" />
+            <img src="/ict_logo.png" alt="ICT Division Logo" className="h-10 w-auto object-contain drop-shadow transition-all hover:scale-110" />
+          </div>
+
+          <div className="text-white/40 text-[9px] font-medium">
+            Designed &amp; developed by the <span className="text-gold font-semibold">ICT Division</span> &mdash; Palayan City Local Government Unit
+          </div>
+        </footer>
       </main>
     );
   }
